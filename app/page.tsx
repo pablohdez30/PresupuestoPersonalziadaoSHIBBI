@@ -1,175 +1,89 @@
-'use client';
-
-import { useEffect, useState } from 'react';
-import { Header } from '@/components/Header';
-import { Hero } from '@/components/Hero';
-import { ProgressRail } from '@/components/ProgressRail';
-import { PricePanel } from '@/components/PricePanel';
-import { MobilePricePanel } from '@/components/MobilePricePanel';
-import { Confirmation } from '@/components/Confirmation';
+import Link from 'next/link';
 import { Container } from '@/components/primitives/Container';
-import { CategoriaSection } from '@/components/sections/CategoriaSection';
-import { MaterialSection } from '@/components/sections/MaterialSection';
-import { PatasSection } from '@/components/sections/PatasSection';
-import { MedidasSection } from '@/components/sections/MedidasSection';
-import { AcabadoSection } from '@/components/sections/AcabadoSection';
-import { DatosSection } from '@/components/sections/DatosSection';
-import { calcularEstimacion } from '@/lib/pricing';
-import type { Configuracion } from '@/lib/types';
 
-const CONFIG_INICIAL: Configuracion = {
-  tipo: 'mesa',
-  material_id: 'roble',
-  grosor: 5,
-  medidas: { largo: 150, ancho: 80, alto: 75 },
-  componentes: [{ id: 'hairpin', cantidad: 4 }],
-  acabado_id: 'aceite',
-  servicios_ids: [],
-  nombre: '',
-  email: '',
-  telefono: '',
-  canal_preferido: 'email',
-  notas_adicionales: '',
-  imagenes: []
-};
-
-export default function Page() {
-  const [config, setConfig] = useState<Configuracion>(CONFIG_INICIAL);
-  const update = (partial: Partial<Configuracion>) => setConfig((c) => ({ ...c, ...partial }));
-
-  const [errors, setErrors] = useState<Record<string, string>>({});
-  const [submitting, setSubmitting] = useState(false);
-  const [submitted, setSubmitted] = useState(false);
-  const [activeStep, setActiveStep] = useState(1);
-
-  // Tracking de sección activa via IntersectionObserver
-  useEffect(() => {
-    const obs = new IntersectionObserver(
-      (entries) => {
-        const visible = entries
-          .filter((e) => e.isIntersecting)
-          .sort((a, b) => b.intersectionRatio - a.intersectionRatio)[0];
-        if (visible) {
-          const m = visible.target.id?.match(/sec-(\d+)/);
-          if (m) setActiveStep(parseInt(m[1], 10));
-        }
-      },
-      { rootMargin: '-30% 0px -50% 0px', threshold: [0, 0.25, 0.5, 0.75, 1] }
-    );
-    document.querySelectorAll("[id^='sec-']").forEach((el) => obs.observe(el));
-    return () => obs.disconnect();
-  }, []);
-
-  function validate(): boolean {
-    const e: Record<string, string> = {};
-    if (!config.nombre.trim()) e.nombre = 'Indícanos cómo te llamas.';
-    if (!config.email.trim()) e.email = 'Necesitamos un email para responderte.';
-    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(config.email)) {
-      e.email = 'Revisa el formato del email.';
-    }
-    setErrors(e);
-    return Object.keys(e).length === 0;
+const OPCIONES = [
+  {
+    href: '/rapido',
+    icon: '⚡',
+    label: 'Rápido',
+    descripcion: 'Si ya tienes claro lo que buscas. Cuéntanoslo en un mensaje, súbenos fotos y te respondemos en 24-48 h.',
+    cta: 'Empezar rápido'
+  },
+  {
+    href: '/guiado',
+    icon: '📋',
+    label: 'Guiado',
+    descripcion: 'Si no sabes por dónde empezar. Te haremos las preguntas necesarias para entender tu mueble paso a paso.',
+    cta: 'Empezar guiado'
   }
+];
 
-  async function onSubmit() {
-    if (!validate()) {
-      document.getElementById('sec-6')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      return;
-    }
-    setSubmitting(true);
-
-    // TODO: cuando esté Supabase + /api/solicitudes, sustituir este stub:
-    //   const { total, desglose } = calcularEstimacion(config);
-    //   const res = await fetch('/api/solicitudes', {
-    //     method: 'POST',
-    //     headers: { 'Content-Type': 'application/json' },
-    //     body: JSON.stringify({ ...config, presupuesto_estimado: total, desglose })
-    //   });
-    //   if (!res.ok) { ...mostrar error... }
-    const { total, desglose } = calcularEstimacion(config);
-    console.log('[stub] Solicitud lista para enviar:', { ...config, presupuesto_estimado: total, desglose });
-
-    setTimeout(() => {
-      setSubmitting(false);
-      setSubmitted(true);
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    }, 1200);
-  }
-
-  function reset() {
-    setSubmitted(false);
-    setConfig(CONFIG_INICIAL);
-    setErrors({});
-    window.scrollTo({ top: 0 });
-  }
-
-  if (submitted) {
-    return (
-      <>
-        <Header />
-        <Confirmation onReset={reset} />
-      </>
-    );
-  }
-
+export default function HomePage() {
   return (
-    <>
-      <Header />
-      <ProgressRail active={activeStep} />
-      <Hero />
+    <Container>
+      <section style={{ paddingTop: 96, paddingBottom: 64 }}>
+        <h1
+          className="display"
+          style={{
+            fontSize: 'clamp(48px, 7vw, 88px)',
+            lineHeight: 1.0,
+            letterSpacing: '-0.03em',
+            marginBottom: 32,
+            textWrap: 'balance' as 'balance'
+          }}
+        >
+          Pide tu mueble.
+          <br />
+          A tu manera.
+        </h1>
+        <p style={{ fontSize: 19, color: 'var(--text-muted)', maxWidth: 560, lineHeight: 1.5 }}>
+          Cuéntanos qué tienes en mente. Te respondemos con propuesta personal en 24-48 horas.
+          <br />
+          Elige cómo prefieres hacerlo.
+        </p>
+      </section>
 
-      <Container>
-        <div className="layout-grid">
-          <main style={{ minWidth: 0 }}>
-            <div id="sec-1"><CategoriaSection config={config} update={update} /></div>
-            <div id="sec-2"><MaterialSection config={config} update={update} /></div>
-            <div id="sec-3"><PatasSection config={config} update={update} /></div>
-            <div id="sec-4"><MedidasSection config={config} update={update} /></div>
-            <div id="sec-5"><AcabadoSection config={config} update={update} /></div>
-            <div id="sec-6">
-              <DatosSection
-                config={config}
-                update={update}
-                errors={errors}
-                onSubmit={onSubmit}
-                submitting={submitting}
-              />
-            </div>
-          </main>
-        </div>
-      </Container>
-
-      <aside className="price-col-fixed hide-mobile">
-        <PricePanel config={config} />
-      </aside>
-
-      <MobilePricePanel config={config} />
-
-      <footer
+      <section
         style={{
-          borderTop: '1px solid var(--border-soft)',
-          padding: '48px 0 96px',
-          marginTop: 96,
-          marginBottom: 80
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
+          gap: 24,
+          paddingBottom: 96
         }}
       >
-        <Container>
-          <div
+        {OPCIONES.map((o) => (
+          <Link
+            key={o.href}
+            href={o.href}
             style={{
               display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'baseline',
-              flexWrap: 'wrap',
-              gap: 16
+              flexDirection: 'column',
+              gap: 16,
+              padding: 32,
+              border: '1px solid var(--border-soft)',
+              borderRadius: 8,
+              background: 'var(--surface)',
+              transition: 'border-color 160ms ease, transform 160ms ease'
             }}
           >
-            <div className="display" style={{ fontSize: 18 }}>Shibbi</div>
-            <div style={{ fontSize: 12, color: 'var(--text-muted)', letterSpacing: '0.04em' }}>
-              shibbishop.com · Taller en España
-            </div>
-          </div>
-        </Container>
-      </footer>
-    </>
+            <span style={{ fontSize: 28 }} aria-hidden>{o.icon}</span>
+            <h2 className="display" style={{ fontSize: 28, letterSpacing: '-0.02em' }}>
+              {o.label}
+            </h2>
+            <p style={{ color: 'var(--text-muted)', lineHeight: 1.5 }}>{o.descripcion}</p>
+            <span
+              style={{
+                marginTop: 'auto',
+                paddingTop: 12,
+                fontSize: 14,
+                fontWeight: 500
+              }}
+            >
+              {o.cta} →
+            </span>
+          </Link>
+        ))}
+      </section>
+    </Container>
   );
 }

@@ -1,6 +1,9 @@
 import type { Metadata } from 'next';
 import { Fraunces, Inter_Tight, JetBrains_Mono } from 'next/font/google';
 import './globals.css';
+import { Header } from '@/components/Header';
+import { TabsMenu } from '@/components/TabsMenu';
+import { Container } from '@/components/primitives/Container';
 
 const fraunces = Fraunces({
   subsets: ['latin'],
@@ -24,9 +27,9 @@ const jetBrainsMono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: 'Shibbi — Presupuesto a medida',
+  title: 'Shibbi — Pide tu mueble a medida',
   description:
-    'Diseña tu mueble Shibbi a medida. Elige el material, las medidas y el acabado. Te damos una estimación al instante.',
+    'Cuéntanos qué mueble buscas. Te respondemos con propuesta personal en 24-48 h.',
   robots: { index: true, follow: true }
 };
 
@@ -36,7 +39,42 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       lang="es"
       className={`${fraunces.variable} ${interTight.variable} ${jetBrainsMono.variable}`}
     >
-      <body className="has-right-panel">{children}</body>
+      <body>
+        <Header />
+        <TabsMenu />
+        {children}
+        <SiteFooter />
+      </body>
     </html>
+  );
+}
+
+function SiteFooter() {
+  return (
+    <footer
+      style={{
+        borderTop: '1px solid var(--border-soft)',
+        padding: '48px 0 96px',
+        marginTop: 96,
+        marginBottom: 80
+      }}
+    >
+      <Container>
+        <div
+          style={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'baseline',
+            flexWrap: 'wrap',
+            gap: 16
+          }}
+        >
+          <div className="display" style={{ fontSize: 18 }}>Shibbi</div>
+          <div style={{ fontSize: 12, color: 'var(--text-muted)', letterSpacing: '0.04em' }}>
+            shibbishop.com · Taller en España
+          </div>
+        </div>
+      </Container>
+    </footer>
   );
 }
