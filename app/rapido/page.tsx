@@ -6,6 +6,7 @@ import { Container } from '@/components/primitives/Container';
 import { LineInput } from '@/components/primitives/LineInput';
 import { PrimaryButton } from '@/components/primitives/PrimaryButton';
 import { RadioCircle } from '@/components/primitives/RadioCircle';
+import { uploadInspiracion } from '@/lib/briefs/upload';
 
 type Canal = 'email' | 'whatsapp' | 'llamada';
 
@@ -48,6 +49,8 @@ export default function RapidoPage() {
   const [imagenes, setImagenes] = useState<ImagenLocal[]>([]);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [submitting, setSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
+  const [submitProgress, setSubmitProgress] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [dragOver, setDragOver] = useState(false);
 
@@ -119,6 +122,7 @@ export default function RapidoPage() {
 
   async function onSubmit(ev: React.FormEvent) {
     ev.preventDefault();
+    setSubmitError(null);
     if (!validate()) {
       const firstError = document.querySelector('[data-error="true"]');
       firstError?.scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -126,15 +130,40 @@ export default function RapidoPage() {
     }
     setSubmitting(true);
 
-    // TODO: cuando esté /api/briefs, sustituir este stub por POST con FormData.
-    console.log('[stub] Brief Rápido listo para enviar:', {
-      tipo: 'rapido',
-      ...data,
-      imagenes: imagenes.map((i) => ({ name: i.file.name, size: i.file.size }))
-    });
+    try {
+      let imagenPaths: string[] = [];
+      if (imagenes.length > 0) {
+        setSubmitProgress(`Subiendo ${imagenes.length} ${imagenes.length === 1 ? 'imagen' : 'imágenes'}…`);
+        imagenPaths = await uploadInspiracion(imagenes.map((i) => i.file));
+      }
 
-    await new Promise((r) => setTimeout(r, 800));
-    router.push('/enviado?tipo=rapido');
+      setSubmitProgress('Enviando consulta…');
+      const res = await fetch('/api/briefs', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          tipo_brief: 'rapido',
+          nombre: data.nombre,
+          email: data.email,
+          telefono: data.telefono || null,
+          ciudad: data.ciudad || null,
+          canal_preferido: data.canal,
+          mensaje: data.mensaje,
+          imagenes: imagenPaths
+        })
+      });
+
+      if (!res.ok) {
+        const body = await res.json().catch(() => ({}));
+        throw new Error(body.error || 'No pudimos enviar tu consulta. Vuelve a intentarlo.');
+      }
+
+      router.push('/enviado?tipo=rapido');
+    } catch (e) {
+      setSubmitError(e instanceof Error ? e.message : 'Error desconocido');
+      setSubmitting(false);
+      setSubmitProgress(null);
+    }
   }
 
   return (
@@ -365,9 +394,27 @@ export default function RapidoPage() {
         </FieldGroup>
 
         <div style={{ marginTop: 48, display: 'flex', flexDirection: 'column', gap: 16 }}>
+          {submitError && (
+            <div
+              role="alert"
+              style={{
+                padding: '12px 14px',
+                background: '#FFE9E5',
+                border: '1px solid #F5B5AD',
+                color: '#8A1A0E',
+                borderRadius: 6,
+                fontSize: 14
+              }}
+            >
+              {submitError}
+            </div>
+          )}
           <PrimaryButton type="submit" loading={submitting}>
             Enviar mi consulta →
           </PrimaryButton>
+          {submitting && submitProgress && (
+            <p style={{ fontSize: 13, color: 'var(--text-muted)' }}>{submitProgress}</p>
+          )}
           <p style={{ fontSize: 13, color: 'var(--text-muted)' }}>
             ¿Prefieres que te hagamos preguntas?{' '}
             <a href="/guiado" style={{ textDecoration: 'underline' }}>

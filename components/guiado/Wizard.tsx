@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import type { Canal, GuiadoBrief, ImagenLocal, TipoMueble } from '@/lib/guiado/types';
 import { BRIEF_INICIAL } from '@/lib/guiado/types';
 import { PREGUNTAS_POR_TIPO } from '@/lib/guiado/preguntas';
+import { uploadInspiracion } from '@/lib/briefs/upload';
 import { Container } from '@/components/primitives/Container';
 import { Progress } from './Progress';
 import { StepNav } from './StepNav';
@@ -34,6 +35,8 @@ export function Wizard() {
   const [brief, setBrief] = useState<GuiadoBrief>(BRIEF_INICIAL);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [submitting, setSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
+  const [submitProgress, setSubmitProgress] = useState<string | null>(null);
   const [restoreAvailable, setRestoreAvailable] = useState(false);
   const initialLoadRef = useRef(false);
 
@@ -231,17 +234,53 @@ export function Wizard() {
 
   async function enviar() {
     setSubmitting(true);
+    setSubmitError(null);
 
-    // TODO: cuando esté /api/briefs sustituir por POST con FormData.
-    console.log('[stub] Brief Guiado listo para enviar:', {
-      tipo_brief: 'guiado',
-      ...brief,
-      imagenes: brief.imagenes.map((i) => ({ name: i.file.name, size: i.file.size }))
-    });
+    try {
+      let imagenPaths: string[] = [];
+      if (brief.imagenes.length > 0) {
+        setSubmitProgress(
+          `Subiendo ${brief.imagenes.length} ${brief.imagenes.length === 1 ? 'imagen' : 'imágenes'}…`
+        );
+        imagenPaths = await uploadInspiracion(brief.imagenes.map((i) => i.file));
+      }
 
-    await new Promise((r) => setTimeout(r, 800));
-    localStorage.removeItem(STORAGE_KEY);
-    router.push('/enviado?tipo=guiado');
+      setSubmitProgress('Enviando consulta…');
+      const res = await fetch('/api/briefs', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          tipo_brief: 'guiado',
+          tipo_mueble: brief.tipo,
+          especifico: brief.especifico,
+          estilo: brief.estilo || null,
+          estancia: brief.estancia || null,
+          plazo: brief.plazo || null,
+          presupuesto: brief.presupuesto || null,
+          notas: brief.notas || null,
+          nombre: brief.nombre,
+          email: brief.email,
+          telefono: brief.telefono || null,
+          ciudad: brief.ciudad || null,
+          cp: brief.cp || null,
+          entrega: brief.entrega || null,
+          canal_preferido: brief.canal,
+          imagenes: imagenPaths
+        })
+      });
+
+      if (!res.ok) {
+        const body = await res.json().catch(() => ({}));
+        throw new Error(body.error || 'No pudimos enviar tu consulta. Vuelve a intentarlo.');
+      }
+
+      localStorage.removeItem(STORAGE_KEY);
+      router.push('/enviado?tipo=guiado');
+    } catch (e) {
+      setSubmitError(e instanceof Error ? e.message : 'Error desconocido');
+      setSubmitting(false);
+      setSubmitProgress(null);
+    }
   }
 
   const meta = useMemo(() => PASOS.find((p) => p.n === paso)!, [paso]);
@@ -319,12 +358,35 @@ export function Wizard() {
           <p style={{ color: 'var(--error)', fontSize: 13, marginTop: 16 }}>{errors.imagenes}</p>
         )}
 
+        {submitError && (
+          <div
+            role="alert"
+            style={{
+              marginTop: 24,
+              padding: '12px 14px',
+              background: '#FFE9E5',
+              border: '1px solid #F5B5AD',
+              color: '#8A1A0E',
+              borderRadius: 6,
+              fontSize: 14
+            }}
+          >
+            {submitError}
+          </div>
+        )}
+
         <StepNav
           onBack={paso > 1 ? atras : undefined}
           onNext={siguiente}
           loading={submitting}
           isLast={isLast}
         />
+
+        {submitting && submitProgress && (
+          <p style={{ fontSize: 13, color: 'var(--text-muted)', marginTop: 16, textAlign: 'right' }}>
+            {submitProgress}
+          </p>
+        )}
       </div>
     </Container>
   );
