@@ -28,7 +28,7 @@ export function TabsMenu() {
         position: 'sticky',
         top: 64,
         zIndex: 35,
-        background: 'rgba(250,250,250,0.92)',
+        background: 'var(--header-bg)',
         backdropFilter: 'saturate(180%) blur(12px)',
         WebkitBackdropFilter: 'saturate(180%) blur(12px)',
         borderBottom: '1px solid var(--border-soft)'
