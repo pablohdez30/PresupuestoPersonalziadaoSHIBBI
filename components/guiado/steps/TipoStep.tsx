@@ -1,7 +1,27 @@
 'use client';
 
+import type { ComponentType, SVGProps } from 'react';
 import type { TipoMueble } from '@/lib/guiado/types';
 import { TIPOS } from '@/lib/guiado/comunes';
+import {
+  IconMesa,
+  IconSilla,
+  IconEstanteria,
+  IconEspejo,
+  IconAparador,
+  IconCabecero,
+  IconOtro
+} from '@/components/icons/Icons';
+
+const ICONO: Record<TipoMueble, ComponentType<SVGProps<SVGSVGElement>>> = {
+  mesa: IconMesa,
+  silla: IconSilla,
+  estanteria: IconEstanteria,
+  espejo: IconEspejo,
+  aparador: IconAparador,
+  cabecero: IconCabecero,
+  otro: IconOtro
+};
 
 export function TipoStep({
   value,
@@ -31,6 +51,7 @@ export function TipoStep({
       >
         {TIPOS.map((t) => {
           const checked = value === t.id;
+          const Icon = ICONO[t.id];
           return (
             <button
               key={t.id}
@@ -40,17 +61,18 @@ export function TipoStep({
                 display: 'flex',
                 flexDirection: 'column',
                 alignItems: 'flex-start',
-                gap: 8,
+                gap: 12,
                 padding: 20,
                 border: `1px solid ${checked ? 'var(--text)' : 'var(--border-soft)'}`,
                 borderRadius: 8,
                 background: checked ? 'var(--accent-bg)' : 'var(--surface)',
                 textAlign: 'left',
                 transition: 'border-color 150ms ease, background 150ms ease',
-                minHeight: 120
+                minHeight: 130,
+                color: 'var(--text)'
               }}
             >
-              <span aria-hidden style={{ fontSize: 24 }}>{t.icono}</span>
+              <Icon width={28} height={28} aria-hidden />
               <span style={{ fontSize: 16, fontWeight: 500 }}>{t.label}</span>
               <span style={{ fontSize: 13, color: 'var(--text-muted)', lineHeight: 1.4 }}>
                 {t.descripcion}

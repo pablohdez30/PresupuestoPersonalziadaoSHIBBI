@@ -1,17 +1,25 @@
 import Link from 'next/link';
 import { Container } from '@/components/primitives/Container';
+import { IconBolt, IconList } from '@/components/icons/Icons';
+import type { ComponentType, SVGProps } from 'react';
 
-const OPCIONES = [
+const OPCIONES: {
+  href: string;
+  Icon: ComponentType<SVGProps<SVGSVGElement>>;
+  label: string;
+  descripcion: string;
+  cta: string;
+}[] = [
   {
     href: '/rapido',
-    icon: '⚡',
+    Icon: IconBolt,
     label: 'Rápido',
     descripcion: 'Si ya tienes claro lo que buscas. Cuéntanoslo en un mensaje, súbenos fotos y te respondemos en 24-48 h.',
     cta: 'Empezar rápido'
   },
   {
     href: '/guiado',
-    icon: '📋',
+    Icon: IconList,
     label: 'Guiado',
     descripcion: 'Si no sabes por dónde empezar. Te haremos las preguntas necesarias para entender tu mueble paso a paso.',
     cta: 'Empezar guiado'
@@ -66,7 +74,7 @@ export default function HomePage() {
               transition: 'border-color 160ms ease, transform 160ms ease'
             }}
           >
-            <span style={{ fontSize: 28 }} aria-hidden>{o.icon}</span>
+            <o.Icon width={32} height={32} aria-hidden style={{ color: 'var(--text)' }} />
             <h2 className="display" style={{ fontSize: 28, letterSpacing: '-0.02em' }}>
               {o.label}
             </h2>

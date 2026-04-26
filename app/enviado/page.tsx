@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { Container } from '@/components/primitives/Container';
+import { IconCheck } from '@/components/icons/Icons';
 
 export const metadata = {
   title: 'Shibbi — Consulta recibida',
@@ -35,10 +36,10 @@ export default function EnviadoPage({
             alignItems: 'center',
             justifyContent: 'center',
             margin: '0 auto 32px',
-            fontSize: 28
+            color: 'var(--text)'
           }}
         >
-          ✓
+          <IconCheck width={28} height={28} />
         </div>
 
         <span className="eyebrow" style={{ display: 'inline-block', marginBottom: 16 }}>

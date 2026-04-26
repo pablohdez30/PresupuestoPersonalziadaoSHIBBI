@@ -8,15 +8,14 @@ type Tab = {
   href: string;
   label: string;
   tagline: string;
-  icon: string;
   disabled?: boolean;
   beta?: boolean;
 };
 
 const TABS: Tab[] = [
-  { href: '/rapido', label: 'Rápido',   tagline: 'Cuéntanoslo a tu manera',  icon: '⚡' },
-  { href: '/guiado', label: 'Guiado',   tagline: 'Te ayudamos paso a paso',  icon: '📋' },
-  { href: '/medida', label: 'A medida', tagline: 'Diseña tú mismo',          icon: '🎛', disabled: true, beta: true }
+  { href: '/rapido', label: 'Rápido',   tagline: 'Cuéntanoslo a tu manera' },
+  { href: '/guiado', label: 'Guiado',   tagline: 'Te ayudamos paso a paso' },
+  { href: '/medida', label: 'A medida', tagline: 'Diseña tú mismo', disabled: true, beta: true }
 ];
 
 export function TabsMenu() {
@@ -85,7 +84,6 @@ function TabItem({ tab, active }: { tab: Tab; active: boolean }) {
 
   const labelRow = (
     <span style={{ display: 'inline-flex', alignItems: 'center', gap: 8 }}>
-      <span aria-hidden style={{ fontSize: 15 }}>{tab.icon}</span>
       <span style={{ fontWeight: 500 }}>{tab.label}</span>
       {tab.beta && (
         <span

@@ -1,13 +1,13 @@
 import type { TipoMueble } from './types';
 
-export const TIPOS: { id: TipoMueble; icono: string; label: string; descripcion: string }[] = [
-  { id: 'mesa',        icono: '🪑', label: 'Mesa',                descripcion: 'Comedor, centro, auxiliar, escritorio…' },
-  { id: 'silla',       icono: '💺', label: 'Silla o banqueta',    descripcion: 'Sillas, butacas, taburetes, bancos.' },
-  { id: 'estanteria',  icono: '🪜', label: 'Estantería',          descripcion: 'Pared, de pie, modular, vitrinas.' },
-  { id: 'espejo',      icono: '🪞', label: 'Espejo',              descripcion: 'Pared, suelo, sobremesa, vestidor.' },
-  { id: 'aparador',    icono: '🗄', label: 'Aparador o cómoda',   descripcion: 'Aparador, cómoda, mueble TV, bar.' },
-  { id: 'cabecero',    icono: '🛏', label: 'Cabecero o cama',     descripcion: 'Cabecero, cama, canapé.' },
-  { id: 'otro',        icono: '🎴', label: 'Otro',                descripcion: 'Cuéntanoslo en texto libre.' }
+export const TIPOS: { id: TipoMueble; label: string; descripcion: string }[] = [
+  { id: 'mesa',        label: 'Mesa',                descripcion: 'Comedor, centro, auxiliar, escritorio…' },
+  { id: 'silla',       label: 'Silla o banqueta',    descripcion: 'Sillas, butacas, taburetes, bancos.' },
+  { id: 'estanteria',  label: 'Estantería',          descripcion: 'Pared, de pie, modular, vitrinas.' },
+  { id: 'espejo',      label: 'Espejo',              descripcion: 'Pared, suelo, sobremesa, vestidor.' },
+  { id: 'aparador',    label: 'Aparador o cómoda',   descripcion: 'Aparador, cómoda, mueble TV, bar.' },
+  { id: 'cabecero',    label: 'Cabecero o cama',     descripcion: 'Cabecero, cama, canapé.' },
+  { id: 'otro',        label: 'Otro',                descripcion: 'Cuéntanoslo en texto libre.' }
 ];
 
 export const ESTILOS = [
